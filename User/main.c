@@ -9,6 +9,8 @@
 #include "math.h"
 #include "nrf24l01.h"
 #include "adc.h"
+#include "led.h"
+#include "key.h"
 
 //#define ENABLE_I2C
 //#define I2c_Hardware
@@ -21,11 +23,13 @@ uint8_t txbuf[5]={2,2,10,14,25};
 uint8_t rxbuf[5]={0,0,0,0,0};
 
 int main (void){//主程序
-	uint8_t ret,i;
+	uint8_t ret,i,lock_toggle = 0;
 	delay_ms(500); //上电时等待其他器件就绪
 	//NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 	RCC_Configuration(); //系统时钟初始化 
 	USART1_Init(115200);
+	KEY_init();
+	LED_Init();
 	printf("core init\r\n");
 
 #ifdef ENABLE_I2C
@@ -46,6 +50,7 @@ int main (void){//主程序
 		printf("nrf24l01 01 failed!\r\n");
 	}
 	NRF24L01_TX_Mode();
+	/*
 	while(1)
 	{
 		ret = NRF24L01_TX_Packet(txbuf);
@@ -67,9 +72,9 @@ int main (void){//主程序
 		}
 		delay_ms(500);
 	}
+	*/
 #endif
-
-	printf("CrazePony serial port test passed!\r\n");
+	
 #ifdef DEBUG_REMOTE
 	ADC_Configuration();
 	printf("ADC inited\r\n");
@@ -80,4 +85,41 @@ int main (void){//主程序
 		delay_ms(200);
 	}
 #endif
+	
+	ADC_Configuration();
+	printf("ADC inited\r\n");
+	
+	while(1) {
+		lock_toggle = 0;
+		if (GPIO_ReadInputDataBit(KEY_PORT, S81_PIN) == 0 || GPIO_ReadInputDataBit(KEY_PORT, S82_PIN) == 0) {
+			delay_ms(20);
+			if (GPIO_ReadInputDataBit(KEY_PORT, S81_PIN) == 0 || GPIO_ReadInputDataBit(KEY_PORT, S82_PIN) == 0)
+			{
+				lock_toggle = 1;
+			}
+		}
+		txbuf[0] = lock_toggle;
+		txbuf[1] = ADC_DMA_IN[0];
+		txbuf[2] = ADC_DMA_IN[1];
+		txbuf[3] = ADC_DMA_IN[2];
+		txbuf[4] = ADC_DMA_IN[3];
+		
+		ret = NRF24L01_TX_Packet(txbuf);
+		if (ret == TX_OK)
+		{
+			for(i=0;i<5;i++)
+			{
+				printf("nrf1 send data is %d \r\n",txbuf[i]);
+			}
+		}
+		else if (ret == MAX_TX)
+		{
+			printf("ret = MAX_TX\r\n");
+		}
+		else
+		{
+			printf("ret != TX_OK\r\n");
+		}
+		delay_ms(200);
+	}
 }

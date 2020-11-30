@@ -365,7 +365,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F10X_MD</Define>
               <Undefine></Undefine>
-              <IncludePath>.\CMSIS;.\Lib\inc;.\Lib\src;.\User;.\Startup;.\Basic\delay;.\Basic\sys;.\Basic\i2c;.\Basic\usart;.\Basic\dmp;.\Basic\spi;.\Hardware\NRF24L01;C:\Keil_v5\ARM\ARMCC\include;.\Basic\adc;.\Basic\pwm</IncludePath>
+              <IncludePath>.\CMSIS;.\Lib\inc;.\Lib\src;.\User;.\Startup;.\Basic\delay;.\Basic\sys;.\Basic\i2c;.\Basic\usart;.\Basic\dmp;.\Basic\spi;.\Hardware\NRF24L01;C:\Keil_v5\ARM\ARMCC\include;.\Basic\adc;.\Basic\pwm;.\Basic\key;.\Basic\led</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -547,6 +547,16 @@
               <FileName>adc.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Basic\adc\adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>key.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Basic\key\key.c</FilePath>
+            </File>
+            <File>
+              <FileName>led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Basic\led\led.c</FilePath>
             </File>
           </Files>
         </Group>
