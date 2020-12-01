@@ -145,8 +145,8 @@ uint8_t NRF24L01_Check(void)
 	uint8_t buf[5]={0xa5,0xa5,0xa5,0xa5,0xa5};
 	uint8_t i;
 
-	NRF24L01_Write_Buf(W_REGISTER+TX_ADDR,5,buf);//写入5字节的地址
-	NRF24L01_Read_Buf(TX_ADDR,5,buf);
+	NRF24L01_Write_Buf(W_REGISTER+TX_ADDR, 5, buf);//写入5字节的地址
+	NRF24L01_Read_Buf(TX_ADDR, 5, buf);
 	for(i=0;i<5;i++)
 		{
 			if(buf[i]!=0xa5)
@@ -211,7 +211,7 @@ uint8_t NRF24L01_TX_Packet(uint8_t *txbuf)
 	uint8_t ret;
 
 	NRF_CE_LOW;
-	NRF24L01_Write_Buf(W_TX_PAYLOAD, TX_PLOAD_WIDTH, txbuf);//写数据到txbuf,32字节
+	NRF24L01_Write_Buf(W_TX_PAYLOAD, TX_PLOAD_WIDTH, txbuf);//写数据到txbuf,10字节
 	NRF_CE_HIGH;//启动发送
 
 	while (NRF_IRQ_STATUS)//等待发送完成
@@ -252,11 +252,11 @@ uint8_t NRF24L01_RX_Packet(uint8_t *rxbuf)
 
 	ret = NRF24L01_Read_Reg(NRF24L01_STATUS);//读取状态寄存器的值
 	NRF24L01_Write_Reg(W_REGISTER+NRF24L01_STATUS, ret);//清除TX_DS or MAX_RT的中断标志
-	if(ret&RX_OK)//接收到数据
-		{
-			NRF24L01_Read_Buf(R_RX_PAYLOAD,RX_PLOAD_WIDTH,rxbuf);//读取数据
-			NRF24L01_Write_Reg(FLUSH_RX,0xFF);//清除RX FIFO寄存器
-			return 0;
+	if(ret & RX_OK)//接收到数据
+	{
+		NRF24L01_Read_Buf(R_RX_PAYLOAD, RX_PLOAD_WIDTH, rxbuf);//读取数据
+		NRF24L01_Write_Reg(FLUSH_RX,0xFF);//清除RX FIFO寄存器
+		return 0;
 	}
 	return 1;//没有接收到数据
 }

@@ -16,11 +16,13 @@
 //#define I2c_Hardware
 extern vu16 ADC_DMA_IN[4];	//摇杆数值存放点
 
+#define HByte(u16_num) ((u16_num & 0xFF00) >> 8)
+#define LByte(u16_num) (u16_num & 0x00FF)
+
 #define DEBUG_NRF24L01
 //#define DEBUG_REMOTE
 
-uint8_t txbuf[5]={2,2,10,14,25};
-uint8_t rxbuf[5]={0,0,0,0,0};
+uint8_t txbuf[TX_PLOAD_WIDTH] = {0};
 
 int main (void){//主程序
 	uint8_t ret,i,lock_toggle = 0;
@@ -91,23 +93,32 @@ int main (void){//主程序
 	
 	while(1) {
 		lock_toggle = 0;
-		if (GPIO_ReadInputDataBit(KEY_PORT, S81_PIN) == 0 || GPIO_ReadInputDataBit(KEY_PORT, S82_PIN) == 0) {
+		if (GPIO_ReadInputDataBit(KEY_PORT, S81_PIN) == 0 || GPIO_ReadInputDataBit(KEY_PORT, S82_PIN) == 0)
+		{
 			delay_ms(20);
 			if (GPIO_ReadInputDataBit(KEY_PORT, S81_PIN) == 0 || GPIO_ReadInputDataBit(KEY_PORT, S82_PIN) == 0)
 			{
 				lock_toggle = 1;
 			}
 		}
-		txbuf[0] = lock_toggle;
-		txbuf[1] = ADC_DMA_IN[0];
-		txbuf[2] = ADC_DMA_IN[1];
-		txbuf[3] = ADC_DMA_IN[2];
-		txbuf[4] = ADC_DMA_IN[3];
+		txbuf[0] = LByte(ADC_DMA_IN[0]);
+		txbuf[1] = HByte(ADC_DMA_IN[0]);
+
+		txbuf[2] = LByte(ADC_DMA_IN[1]);
+		txbuf[3] = HByte(ADC_DMA_IN[1]);
+
+		txbuf[4] = LByte(ADC_DMA_IN[2]);
+		txbuf[5] = HByte(ADC_DMA_IN[2]);
+
+		txbuf[6] = LByte(ADC_DMA_IN[3]);
+		txbuf[7] = HByte(ADC_DMA_IN[3]);
+
+		txbuf[8] = lock_toggle;
 		
 		ret = NRF24L01_TX_Packet(txbuf);
 		if (ret == TX_OK)
 		{
-			for(i=0;i<5;i++)
+			for(i = 0; i < TX_PLOAD_WIDTH; i++)
 			{
 				printf("nrf1 send data is %d \r\n",txbuf[i]);
 			}
