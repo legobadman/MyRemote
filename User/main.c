@@ -19,9 +19,10 @@ extern vu16 ADC_DMA_IN[4];	//摇杆数值存放点
 #define HByte(u16_num) ((u16_num & 0xFF00) >> 8)
 #define LByte(u16_num) (u16_num & 0x00FF)
 
-#define DEBUG_NRF24L01
+//#define DEBUG_NRF24L01
 //#define DEBUG_REMOTE
 
+//uint8_t txbuf[TX_PLOAD_WIDTH] = {10,2,3,7,5,6,4,8,9,1};
 uint8_t txbuf[TX_PLOAD_WIDTH] = {0};
 
 int main (void){//主程序
@@ -30,6 +31,8 @@ int main (void){//主程序
 	//NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 	RCC_Configuration(); //系统时钟初始化 
 	USART1_Init(115200);
+	SPI_GPIO_Init();
+	SPI1_Init();
 	KEY_init();
 	LED_Init();
 	printf("core init\r\n");
@@ -43,8 +46,7 @@ int main (void){//主程序
 #endif
 
 #ifdef DEBUG_NRF24L01
-	SPI_GPIO_Init();
-	SPI1_Init();
+
 	NRF24L01_Init();
 	printf("nrf24l01 start!\r\n");
 	while (NRF24L01_Check())
@@ -52,7 +54,7 @@ int main (void){//主程序
 		printf("nrf24l01 01 failed!\r\n");
 	}
 	NRF24L01_TX_Mode();
-	/*
+	
 	while(1)
 	{
 		ret = NRF24L01_TX_Packet(txbuf);
@@ -60,7 +62,7 @@ int main (void){//主程序
 		{
 			printf("nrf1 send is sucessed!\r\n");
 			printf("\r\n");
-			for(i=0;i<5;i++)
+			for(i=0; i<TX_PLOAD_WIDTH; i++)
 			{
 				printf("nrf1 send data is %d \r\n",txbuf[i]);
 			}
@@ -74,7 +76,6 @@ int main (void){//主程序
 		}
 		delay_ms(500);
 	}
-	*/
 #endif
 	
 #ifdef DEBUG_REMOTE
@@ -88,6 +89,17 @@ int main (void){//主程序
 	}
 #endif
 	
+	//主流程
+	NRF24L01_Init();
+	
+	printf("nrf24l01 start!\r\n");
+	while (NRF24L01_Check())
+	{
+		printf("nrf24l01 01 failed!\r\n");
+	}
+	NRF24L01_TX_Mode();
+
+
 	ADC_Configuration();
 	printf("ADC inited\r\n");
 	
@@ -120,7 +132,7 @@ int main (void){//主程序
 		{
 			for(i = 0; i < TX_PLOAD_WIDTH; i++)
 			{
-				printf("nrf1 send data is %d \r\n",txbuf[i]);
+				printf("nrf1 send data3 is %d \r\n",txbuf[i]);
 			}
 		}
 		else if (ret == MAX_TX)
